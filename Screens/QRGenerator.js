@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, Text, View } from "react-native";
-import InputModal from "../Components/InputModal";
+import InputModal from "../Components/InputTextModal";
 import QRCode from "react-native-qrcode-svg";
 import { TextInput } from "react-native-gesture-handler";
 import { constructUPILink, parseURILink } from "../Helpers/UPIParser";
@@ -71,7 +71,7 @@ export default function QRCodeGenerator() {
         <InputModal
           name={"name"}
           message={"Please enter your name :"}
-          show={!!!name}
+          show={!name}
           setShow={setName}
           verify={verifyName}
         />
@@ -80,7 +80,7 @@ export default function QRCodeGenerator() {
         <InputModal
           name={"upiId"}
           message={"Please enter your UPI ID :"}
-          show={!!!upiId}
+          show={!upiId}
           setShow={setUpiId}
           verify={verifyUpiId}
         />

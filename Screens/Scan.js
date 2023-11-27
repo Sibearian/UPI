@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Button, View } from "react-native";
+import { Alert, Button, View } from "react-native";
 import Scanner from "../Components/Scanner";
 import { parseURILink } from "../Helpers/UPIParser";
 import { useIsFocused } from "@react-navigation/native";
+
+const upiRegex = new RegExp(/upi:\/\/pay?.*/);
 
 export default function Scan({ navigation }) {
   const [scanned, setScanned] = useState(null);
@@ -13,6 +15,10 @@ export default function Scan({ navigation }) {
   }, [isFocused]);
 
   const handleQRScan = ({ data }) => {
+    if (!data || !upiRegex.test(data) || parseURILink(data) === false) {
+      Alert.alert("Invalid QR Code");
+      return;
+    }
     setScanned(true);
     navigation.push("Pay", { title: "Pay", data: parseURILink(data) });
   };

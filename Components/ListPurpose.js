@@ -1,22 +1,11 @@
-import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Linking,
-  Text,
-  TextInput,
-  View,
-  Pressable,
-  Image,
-} from "react-native";
-import { constructUPILink } from "../Helpers/UPIParser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ItemsList from "../Components/Item";
+import React, { useEffect, useState } from "react";
+import { View, TextInput, Image, Pressable } from "react-native";
+import ItemsList from "./Item";
 
-export default function Pay({ route, navigation }) {
-  const upi = route.params.data;
-  const [amount, setAmount] = useState(0);
+export default function List() {
   const [data, setData] = useState([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(null);
   const [rerender, setRerender] = useState(false);
 
   AsyncStorage.getItem("purpose")
@@ -33,46 +22,25 @@ export default function Pay({ route, navigation }) {
 
   useEffect(() => {
     setRerender(true);
-  }, [upi.url, rerender]);
-
-  function openUPIApp() {
-    Linking.openURL(constructUPILink(upi, amount)).catch((e) =>
-      console.error(e)
-    );
-  }
+  }, [rerender]);
 
   return (
     <View>
-      <Text>{upi?.q?.pn}</Text>
-      <Text>{upi?.q?.pa}</Text>
-
-      <TextInput
-        placeholder={upi?.q?.am}
-        editable={!upi?.q?.am}
-        keyboardType="numeric"
-        inputMode="decimal"
-        onChangeText={(text) => setAmount(Number(text).toFixed(2))}
-        autoFocus
-        defaultValue={upi?.q?.am ? upi?.q?.am : null}
-      />
-
-      <Text>Tags</Text>
       <View style={{ flexDirection: "row" }}>
         <TextInput
           style={{ flexBasis: "auto", flexGrow: 1 }}
           onChangeText={(text) => setInput(text)}
-          value={input}
-          autoFocus
         />
         <Pressable
           onPress={() => {
-            if (data.indexOf(input) === -1 && input != "") {
+            if (data.indexOf(input) === -1) {
               AsyncStorage.setItem(
                 "purpose",
                 JSON.stringify({ purpose: [...data, input] })
-              ).then(() => {});
+              ).then(() => {
+                console.info("added", data, input);
+              });
               setRerender(true);
-              setInput("");
             }
           }}
           style={{ flexBasis: 30 }}
@@ -89,15 +57,6 @@ export default function Pay({ route, navigation }) {
         </Pressable>
       </View>
       <ItemsList data={data} filter={input} />
-
-      <Button title="Pay" onPress={openUPIApp} />
-
-      <Button
-        title="Go Back"
-        onPress={() => {
-          navigation.pop();
-        }}
-      />
     </View>
   );
 }

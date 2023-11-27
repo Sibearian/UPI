@@ -2,24 +2,35 @@
  * @param {string} url
  */
 export function parseURILink(url) {
-  let params = {};
-  params.url = url;
-  let [header, parameters] = url.split("?", 2);
-  let [left, right] = header.split("://", 2);
-  params.protocol = left;
-  params.mode = right;
+  try {
 
-  // Setting up the params variable
-  params.q = {};
-  for (const param of parameters.split("&")) {
-    let [key, val] = param.split("=", 2);
-    if(!key || !val) continue;
-    params.q[key] = val.replace("%20", " ").replace("+", " ") || null;
+    let params = {};
+    params.url = url;
+    let [header, parameters] = url.split("?", 2);
+    let [left, right] = header.split("://", 2);
+    params.protocol = left;
+    params.mode = right;
+  
+    // Setting up the params variable
+    params.q = {};
+    for (const param of parameters.split("&")) {
+      let [key, val] = param.split("=", 2);
+      if(!key || !val) continue;
+      params.q[key] = val.replace("%20", " ").replace("+", " ") || null;
+    }
+  
+    return params;
+  } catch (e) {
+    return false
   }
-
-  return params;
 }
 
+/**
+ * 
+ * @param {object} data 
+ * @param {number} amount 
+ * @returns {string}
+ */
 export function constructUPILink(data, amount) {
   if (data?.q?.am) {
     return data.url;
