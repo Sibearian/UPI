@@ -1,21 +1,22 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import Scan from "./Screens/Scan";
-import Pay from "./Screens/Pay";
+import Home from "./Screens/Home";
 import QRCodeGenerator from "./Screens/QRGenerator";
+import { UserDataProvider } from "./Context/userdata.context";
 
 const Stack = createStackNavigator();
 
 const HelloWorldApp = () => {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Scan QR" component={Scan} />
-        <Stack.Screen name="Pay" component={Pay} options={({route}) => ({title : route.params.title})}/>
-        <Stack.Screen name="QR Code" component={QRCodeGenerator} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+	return (
+		<NavigationContainer>
+			<UserDataProvider>
+				<Stack.Navigator>
+					<Stack.Screen name="Scan QR" component={Home} />
+					<Stack.Screen name="QR Code" component={QRCodeGenerator} />
+				</Stack.Navigator>
+			</UserDataProvider>
+		</NavigationContainer>
+	);
 };
 export default HelloWorldApp;
