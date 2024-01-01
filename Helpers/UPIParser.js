@@ -2,47 +2,47 @@
  * @param {string} url
  */
 export function parseURILink(url) {
-  try {
+	try {
+		let params = {};
+		params.url = url;
+		let [header, parameters] = url.split("?", 2);
+		let [left, right] = header.split("://", 2);
+		params.protocol = left;
+		params.mode = right;
 
-    let params = {};
-    params.url = url;
-    let [header, parameters] = url.split("?", 2);
-    let [left, right] = header.split("://", 2);
-    params.protocol = left;
-    params.mode = right;
-  
-    // Setting up the params variable
-    params.q = {};
-    for (const param of parameters.split("&")) {
-      let [key, val] = param.split("=", 2);
-      if(!key || !val) continue;
-      params.q[key] = val.replace("%20", " ").replace("+", " ") || null;
-    }
-  
-    return params;
-  } catch (e) {
-    return false
-  }
+		// Setting up the params variable
+		params.q = {};
+		for (const param of parameters.split("&")) {
+			let [key, val] = param.split("=", 2);
+			if (!key || !val) continue;
+			params.q[key] = val.replace("%20", " ").replace("+", " ") || null;
+		}
+
+		return params;
+	} catch (e) {
+		return false;
+	}
 }
 
 /**
- * 
- * @param {object} data 
- * @param {number} amount 
+ *
+ * @param {object} data
+ * @param {number} amount
  * @returns {string}
  */
 export function constructUPILink(data, amount) {
-  if (data?.q?.am) {
-    return data.url;
-  }
+	if (!data?.q?.am && Number(data?.q?.am) !== 0) {
+		return data.url;
+	}
 
-  data.q.am = Number(amount).toFixed(2);
+	const q = { ...data?.q };
+	q.am = String(amount);
 
-  let url = "upi://pay?";
-  for (const param in data.q) {
-    if (!data.q[param]) continue;
-    url += param + "=" + data.q[param] + "&";
-  }
+	let url = [];
+	for (const param in q) {
+		if (!q[param]) continue;
+		url.push(param + "=" + q[param]);
+	}
 
-  return url.slice(0, -1).replace(" ", "%20");
+	return "upi://pay?" + url.join("&");
 }

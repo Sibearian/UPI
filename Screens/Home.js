@@ -15,12 +15,16 @@ export default function Home({ navigation }) {
 	}, [isFocused]);
 
 	const handleQRScan = ({ data }) => {
-		if (!data || !upiRegex.test(data) || parseURILink(data) === false) {
+		const parsedData = parseURILink(data);
+		if (!data || !upiRegex.test(data) || parsedData === false) {
 			Alert.alert("Invalid QR Code");
 			return;
 		}
 		setScanned(true);
-		console.info("Scanned");
+		navigation.navigate("Pay", {
+			data: parsedData,
+			title: parsedData.q?.pa,
+		});
 	};
 
 	return (

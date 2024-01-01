@@ -34,7 +34,7 @@ export default function QRCodeGenerator() {
 						);
 						return;
 					}
-					setAmount(Number(text).toFixed(2));
+					setAmount(parseFloat(text).toFixed(2));
 				}}
 			/>
 		</View>
