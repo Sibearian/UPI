@@ -6,23 +6,38 @@
     <title>UPI</title>
   </head>
   <body>
+    <h1>Hi</h1>
     <video id="stream" style="width: 100vw; height: 100vh">Why</video>
     <canvas id="canvas"></canvas>
     <script>
       /**
        * @type {HTMLVideoElement}
-      */
+       */
       let video = document.querySelector("#stream");
 
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const stream = navigator.mediaDevices
+        .getUserMedia({
           video: { facingMode: { ideal: "environment" } },
           audio: false,
+        })
+        .then((stream) => {
+          video.srcObject = stream;
+          video.play();
         });
 
-        video.srcObject = stream;
-        await video.play()
+      video.addEventListener(
+        "canplay",
+        (ev) => {
+          if (!streaming) {
+            height = (video.videoHeight / video.videoWidth) * width;
 
-
+            video.setAttribute("width", width);
+            video.setAttribute("height", height);
+            streaming = true;
+          }
+        },
+        false
+      );
     </script>
   </body>
 </html>
