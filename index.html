@@ -10,6 +10,7 @@
     <video id="stream" style="width: 75vw; height: 75vh">Why</video>
     <div id="error"></div>
     <div id="output"></div>
+    <div><ul id="logs"></ul></div>
     <script>
       /**
        * @type {HTMLVideoElement}
@@ -23,6 +24,14 @@
        * @type {HTMLDivElement}
        */
       let output = document.querySelector("#output");
+      /**
+       * @type {HTMLUListElement}
+       */
+      let log = document.querySelector("#logs");
+
+      function logger(string) {
+        log.innerHTML += `<li>${string}</li>`;
+      }
 
       const stream = navigator.mediaDevices
         .getUserMedia({
@@ -40,17 +49,24 @@
         const barcodeDetector = new BarcodeDetector({
           formats: ["qr_code"],
         });
+
+        logger("suppoerted");
+        BarcodeDetector.getSupportedFormats().then((supportedFormats) => {
+          supportedFormats.forEach((format) => logger(format));
+        });
+        logger("end");
+
         window.setInterval(async () => {
           try {
             const barcodes = barcodeDetector.detect(video);
             let string = "<ul>";
             for (let index = 0; index < barcodes.length; index++) {
-              string.concat(
+              logger("Barcode detected, " + JSON.stringify(barcodes[index]));
+              string +=
                 "<li>" +
-                  barcodes[index].rawValue +
-                  JSON.stringify(barcodes[index]) +
-                  "</li>"
-              );
+                barcodes[index].rawValue +
+                JSON.stringify(barcodes[index]) +
+                "</li>";
             }
             string += "</ul>";
             output.innerHTML = string;
