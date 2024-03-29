@@ -7,8 +7,9 @@
   </head>
   <body>
     <h1>Hi</h1>
-    <video id="stream" style="width: 100vw; height: 100vh">Why</video>
+    <video id="stream" style="width: 75vw; height: 75vh">Why</video>
     <div id="error"></div>
+    <div id="output"></div>
     <script>
       /**
        * @type {HTMLVideoElement}
@@ -18,6 +19,10 @@
        * @type {HTMLDivElement}
        */
       let error = document.querySelector("#error");
+      /**
+       * @type {HTMLDivElement}
+       */
+      let output = document.querySelector("#output");
 
       const stream = navigator.mediaDevices
         .getUserMedia({
@@ -29,22 +34,27 @@
           video.play();
         });
 
-      video.addEventListener(
-        "canplay",
-        (ev) => {
-          if (!streaming) {
-            height = (video.videoHeight / video.videoWidth) * width;
-
-            video.setAttribute("width", width);
-            video.setAttribute("height", height);
-            streaming = true;
-          }
-        },
-        false
-      );
-
       if (!("BarcodeDetector" in globalThis)) {
         error.innerText = "Barcode Detector is not supported by this browser.";
+      } else {
+        const barcodeDetector = new BarcodeDetector({
+          formats: ["qr_code"],
+        });
+        window.setInterval(() => {
+          barcodeDetector.detect(video).then((barcodes) => {
+            let string = "<ul>";
+            for (let index = 0; index < barcodes.length; index++) {
+              string.concat(
+                "<li>" +
+                barcodes[index].rawValue +
+                JSON.stringify(barcodes[index]) +
+                "</li>"
+              );
+            }
+            string += "</ul>";
+            output.innerHTML = string;
+          });
+        }, 100);
       }
     </script>
   </body>
