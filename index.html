@@ -52,16 +52,18 @@
 
         logger("suppoerted");
         BarcodeDetector.getSupportedFormats().then((supportedFormats) => {
-          supportedFormats.forEach((format) => logger(format));
+          let temp = "";
+          supportedFormats.forEach((format) => (temp += format + "<br />"));
+          logger(temp);
         });
         logger("end");
 
-        window.setInterval(async () => {
+        setInterval(async () => {
           try {
+            logger("in Interval");
             const barcodes = barcodeDetector.detect(video);
             let string = "<ul>";
             for (let index = 0; index < barcodes.length; index++) {
-              logger("Barcode detected, " + JSON.stringify(barcodes[index]));
               string +=
                 "<li>" +
                 barcodes[index].rawValue +
@@ -69,9 +71,10 @@
                 "</li>";
             }
             string += "</ul>";
+            logger(string);
             output.innerHTML = string;
           } catch (err) {
-            error.innerText = JSON.stringify(err);
+            error.innerText = err;
           }
         }, 100);
       }
