@@ -8,5 +8,21 @@
   <body>
     <video id="stream" style="width: 100vw; height: 100vh">Why</video>
     <canvas id="canvas"></canvas>
+    <script>
+      /**
+       * @type {HTMLVideoElement}
+      */
+      let video = document.querySelector("#stream");
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        });
+
+        video.srcObject = stream;
+        await video.play()
+
+
+    </script>
   </body>
 </html>
