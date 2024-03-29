@@ -8,12 +8,16 @@
   <body>
     <h1>Hi</h1>
     <video id="stream" style="width: 100vw; height: 100vh">Why</video>
-    <canvas id="canvas"></canvas>
+    <div id="error"></div>
     <script>
       /**
        * @type {HTMLVideoElement}
        */
       let video = document.querySelector("#stream");
+      /**
+       * @type {HTMLDivElement}
+       */
+      let error = document.querySelector("#error");
 
       const stream = navigator.mediaDevices
         .getUserMedia({
@@ -38,6 +42,10 @@
         },
         false
       );
+
+      if (!("BarcodeDetector" in globalThis)) {
+        error.innerText = "Barcode Detector is not supported by this browser.";
+      }
     </script>
   </body>
 </html>
