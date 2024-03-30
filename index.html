@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UPI</title>
     <script>
-      /**
-       * @type {boolean}
-       */
-      let isScanned = false;
+      const state = {
+        upi: null,
+        scanned: true,
+      };
+      const UPI_URI_START = "upi://pay?";
 
       function scanAgain() {
-        isScanned = false;
+        state.scanned = false;
       }
     </script>
   </head>
@@ -40,9 +41,9 @@
        */
       let log = document.querySelector("#logs");
 
-      function logger(string) {
-        log.innerHTML += `<li>${string}</li>`;
-      }
+      // function logger(string) {
+      //   log.innerHTML += `<li>${string}</li>`;
+      // }
 
       const stream = navigator.mediaDevices
         .getUserMedia({
@@ -52,6 +53,7 @@
         .then((stream) => {
           video.srcObject = stream;
           video.play();
+          scanAgain();
         });
 
       if (!("BarcodeDetector" in globalThis)) {
@@ -62,20 +64,23 @@
         });
 
         setInterval(async () => {
-          if (isScanned) return;
+          if (state.scanned) return;
           try {
             const barcodes = await barcodeDetector.detect(video);
-            let string = "<ul>";
+            let url = "";
             for (let index = 0; index < barcodes.length; index++) {
-              string =
-                string +
-                "<li>" +
-                barcodes[index].rawValue +
-                JSON.stringify(barcodes[index]) +
-                "</li>";
+              url = barcodes[i].rawValue;
+              if (!url.startsWith(UPI_URI_START)) continue;
+
+              const temp = new URL(url);
+              if (!(temp.searchParams.has("pa") && temp.searchParams.has("pn")))
+                return;
+
+              state.upi = temp;
+              state.scanned = true;
+
+              output.innerText = temp.href;
             }
-            string = string + "</ul>";
-            output.innerHTML = string;
           } catch (err) {
             error.innerText = err;
           }
