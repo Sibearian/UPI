@@ -4,10 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UPI</title>
+    <script>
+      /**
+       * @type {boolean}
+       */
+      let isScanned = false;
+
+      function scanAgain() {
+        isScanned = false;
+      }
+    </script>
   </head>
   <body>
     <h1>Hi</h1>
     <video id="stream" style="width: 75vw; height: 75vh">Why</video>
+    <button type="button" onclick="scanAgain()">Scan Again</button>
     <div id="error"></div>
     <div id="output"></div>
     <div><ul id="logs"></ul></div>
@@ -50,17 +61,9 @@
           formats: ["qr_code"],
         });
 
-        logger("suppoerted");
-        BarcodeDetector.getSupportedFormats().then((supportedFormats) => {
-          let temp = "";
-          supportedFormats.forEach((format) => (temp += format + "<br />"));
-          logger(temp);
-        });
-        logger("end");
-
         setInterval(async () => {
+          if (isScanned) return;
           try {
-            logger("in Interval");
             const barcodes = await barcodeDetector.detect(video);
             let string = "<ul>";
             for (let index = 0; index < barcodes.length; index++) {
@@ -72,7 +75,6 @@
                 "</li>";
             }
             string = string + "</ul>";
-            logger("gg:" + string);
             output.innerHTML = string;
           } catch (err) {
             error.innerText = err;
