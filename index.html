@@ -68,7 +68,7 @@
           try {
             const barcodes = await barcodeDetector.detect(video);
             let url = "";
-            for (let index = 0; index < barcodes.length; index++) {
+            for (let i = 0; i < barcodes.length; i++) {
               url = barcodes[i].rawValue;
               if (!url.startsWith(UPI_URI_START)) continue;
 
