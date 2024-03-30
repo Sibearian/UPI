@@ -61,7 +61,7 @@
         setInterval(async () => {
           try {
             logger("in Interval");
-            const barcodes = barcodeDetector.detect(video);
+            const barcodes = await barcodeDetector.detect(video);
             let string = "<ul>";
             for (let index = 0; index < barcodes.length; index++) {
               string =
