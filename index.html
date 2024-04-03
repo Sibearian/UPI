@@ -17,7 +17,6 @@
     </script>
   </head>
   <body>
-    <h1>Hi</h1>
     <video id="stream" style="width: 75vw; height: 75vh">Why</video>
     <button type="button" onclick="scanAgain()">Scan Again</button>
     <div id="error"></div>
@@ -36,56 +35,62 @@
        * @type {HTMLDivElement}
        */
       let output = document.querySelector("#output");
-      /**
-       * @type {HTMLUListElement}
-       */
-      let log = document.querySelector("#logs");
 
       // function logger(string) {
       //   log.innerHTML += `<li>${string}</li>`;
       // }
 
-      const stream = navigator.mediaDevices
-        .getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false,
-        })
-        .then((stream) => {
-          video.srcObject = stream;
-          video.play();
-          scanAgain();
-        });
+      function checkRequirements() {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          throw "no media devices api";
+        }
 
-      if (!("BarcodeDetector" in globalThis)) {
-        error.innerText = "Barcode Detector is not supported by this browser.";
-      } else {
-        const barcodeDetector = new BarcodeDetector({
-          formats: ["qr_code"],
-        });
+        if (!("BarcodeDetector" in globalThis)) {
+          throw "Barcode Detector is not supported by this browser.";
+        }
 
-        setInterval(async () => {
-          if (state.scanned) return;
-          try {
-            const barcodes = await barcodeDetector.detect(video);
-            let url = "";
-            for (let i = 0; i < barcodes.length; i++) {
-              url = barcodes[i].rawValue;
-              if (!url.startsWith(UPI_URI_START)) continue;
-
-              const temp = new URL(url);
-              if (!(temp.searchParams.has("pa") && temp.searchParams.has("pn")))
-                return;
-
-              state.upi = temp;
-              state.scanned = true;
-
-              output.innerText = temp.href;
-            }
-          } catch (err) {
-            error.innerText = err;
-          }
-        }, 100);
+        return true;
       }
+
+      function setup() {
+        const stream = navigator.mediaDevices
+          .getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+          })
+          .then((stream) => {
+            video.srcObject = stream;
+            video.play();
+            scanAgain();
+          });
+      }
+
+      const barcodeDetector = new BarcodeDetector({
+        formats: ["qr_code"],
+      });
+
+      setInterval(async () => {
+        if (state.scanned) return;
+        try {
+          const barcodes = await barcodeDetector.detect(video);
+          let url = "";
+          for (let i = 0; i < barcodes.length; i++) {
+            url = barcodes[i].rawValue;
+            if (!url.startsWith(UPI_URI_START)) continue;
+
+            const temp = new URL(url);
+            if (!(temp.searchParams.has("pa") && temp.searchParams.has("pn")))
+              return;
+
+            state.upi = temp;
+            state.scanned = true;
+
+            output.innerText = temp.href;
+          }
+        } catch (err) {
+          error.innerText = err;
+        }
+      }, 100);
     </script>
   </body>
 </html>
