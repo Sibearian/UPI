@@ -4,12 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UPI</title>
+    <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.20/dist/index.js"></script>
     <script>
+      try {
+        window["BarcodeDetector"].getSupportedFormats();
+      } catch {
+        window["BarcodeDetector"] =
+          barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
+      }
+
       const state = {
         upi: null,
         scanned: true,
       };
-      const UPI_URI_START = "upi://pay?";
 
       function scanAgain() {
         state.scanned = false;
@@ -41,10 +49,7 @@
        */
       let output = document.querySelector("#output");
       function checkRequirements() {
-        if (
-          !navigator.mediaDevices?.getUserMedia ||
-          !("BarcodeDetector" in globalThis)
-        ) {
+        if (!navigator.mediaDevices?.getUserMedia) {
           return "Browser not supported";
         }
 
@@ -94,7 +99,7 @@
         }
         if (
           !(
-            temp.protocol === "upi" &&
+            temp.href.startsWith("upi://pay?") &&
             temp.searchParams.has("pa") &&
             temp.searchParams.has("pn")
           )
@@ -106,13 +111,15 @@
       function onScanSuccess(qrcodes) {
         let url;
         for (const qr of qrcodes) {
-          url = URLFilter(qr);
+          url = URLFilter(qr.rawValue);
           if (url === null) continue;
 
+          console.log(url.href);
           state.scanned = true;
           state.upi = url.href;
 
           output.innerHTML = state.upi;
+          break;
         }
       }
       function onScanFailure(err) {
