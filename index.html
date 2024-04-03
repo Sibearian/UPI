@@ -19,9 +19,14 @@
   <body>
     <video id="stream" style="width: 75vw; height: 75vh">Why</video>
     <button type="button" onclick="scanAgain()">Scan Again</button>
-    <div id="error"></div>
-    <div id="output"></div>
-    <div><ul id="logs"></ul></div>
+    <div>
+      <h1>Output</h1>
+      <div id="output"></div>
+    </div>
+    <div>
+      <h1>Errors</h1>
+      <div id="error"></div>
+    </div>
     <script>
       /**
        * @type {HTMLVideoElement}
@@ -35,62 +40,86 @@
        * @type {HTMLDivElement}
        */
       let output = document.querySelector("#output");
-
-      // function logger(string) {
-      //   log.innerHTML += `<li>${string}</li>`;
-      // }
-
       function checkRequirements() {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          throw "no media devices api";
-        }
-
-        if (!("BarcodeDetector" in globalThis)) {
-          throw "Barcode Detector is not supported by this browser.";
+        if (
+          !navigator.mediaDevices?.getUserMedia ||
+          !("BarcodeDetector" in globalThis)
+        ) {
+          return "Browser not supported";
         }
 
         return true;
       }
 
-      function setup() {
-        const stream = navigator.mediaDevices
+      /**
+       * @param {HTMLVideoElement} video
+       */
+      function start() {
+        if (checkRequirements() !== true) {
+          error.innerText = checkRequirements();
+          return;
+        }
+
+        const detector = new BarcodeDetector({
+          formats: ["qr_code"],
+        });
+
+        navigator.mediaDevices
           .getUserMedia({
             video: { facingMode: { ideal: "environment" } },
             audio: false,
           })
-          .then((stream) => {
-            video.srcObject = stream;
+          .then((s) => {
+            video.srcObject = s;
             video.play();
             scanAgain();
           });
+
+        window.setInterval(() => {
+          if (state.scanned) return;
+          detector.detect(video).then(onScanSuccess).catch(onScanFailure);
+        }, 100);
       }
 
-      const barcodeDetector = new BarcodeDetector({
-        formats: ["qr_code"],
-      });
-
-      setInterval(async () => {
-        if (state.scanned) return;
+      /**
+       * @param {string} url
+       * @returns {null|URL}
+       */
+      function URLFilter(url) {
+        let temp;
         try {
-          const barcodes = await barcodeDetector.detect(video);
-          let url = "";
-          for (let i = 0; i < barcodes.length; i++) {
-            url = barcodes[i].rawValue;
-            if (!url.startsWith(UPI_URI_START)) continue;
-
-            const temp = new URL(url);
-            if (!(temp.searchParams.has("pa") && temp.searchParams.has("pn")))
-              return;
-
-            state.upi = temp;
-            state.scanned = true;
-
-            output.innerText = temp.href;
-          }
-        } catch (err) {
-          error.innerText = err;
+          temp = new URL(url);
+        } catch (_) {
+          return null;
         }
-      }, 100);
+        if (
+          !(
+            temp.protocol === "upi" &&
+            temp.searchParams.has("pa") &&
+            temp.searchParams.has("pn")
+          )
+        ) {
+          return null;
+        }
+        return temp;
+      }
+      function onScanSuccess(qrcodes) {
+        let url;
+        for (const qr of qrcodes) {
+          url = URLFilter(qr);
+          if (url === null) continue;
+
+          state.scanned = true;
+          state.upi = url.href;
+
+          output.innerHTML = state.upi;
+        }
+      }
+      function onScanFailure(err) {
+        error.innerHTML = err;
+      }
+
+      start();
     </script>
   </body>
 </html>
