@@ -5,5 +5,5 @@ export default defineConfig({
   server: { https: true, host: "0.0.0.0" }, // Not needed for Vite 5+
   plugins: [mkcert()],
   root: "src",
-  build: { outDir: "../public" },
+  build: { outDir: "../dist" },
 });
