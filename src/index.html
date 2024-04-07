@@ -21,7 +21,6 @@
     <div class="flex">
       <video id="stream" class="">Camera preview</video>
       <button type="button" class="" onclick="scanAgain()">Scan Again</button>
-      <a href="/pay"></a>
     </div>
     <script>
       let video = document.querySelector("#stream");
@@ -64,7 +63,7 @@
           state.scanned = true;
           state.upi = url.href;
 
-          window.location.assign(window.location.origin + "/pay");
+          window.location.assign(window.location.origin + "/pay.html");
           return
         }
       }
