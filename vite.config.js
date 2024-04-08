@@ -13,6 +13,7 @@ export default defineConfig({
         pay: resolve(__dirname, "src/pay.html")
       },
     },
-    outDir: "../dist"
+    outDir: "../dist",
+    emptyOutDir: true
   }
 });
